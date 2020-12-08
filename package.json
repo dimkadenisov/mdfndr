@@ -8,8 +8,20 @@
     "start": "next start"
   },
   "dependencies": {
+    "form-data": "^3.0.0",
+    "lodash": "^4.17.20",
     "next": "10.0.3",
+    "prop-types": "^15.7.2",
     "react": "17.0.1",
-    "react-dom": "17.0.1"
+    "react-dom": "17.0.1",
+    "unsplash-js": "^7.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.14.0",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-prettier": "^3.2.0",
+    "eslint-plugin-react": "^7.21.5",
+    "prettier": "^2.2.1"
   }
 }
