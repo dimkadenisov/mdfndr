@@ -1,7 +1,61 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import React from 'react';
+import Head from 'next/head';
+import ImageGrid from '../components/imageGrid';
+import styles from '../styles/Home.module.css';
 
 export default function Home() {
+  const [photos, setPhotos] = React.useState(null);
+
+  const handleAutorizeButtonClick = React.useCallback(() => {
+    window.location.assign(
+      'https://oauth.vk.com/authorize?' +
+        new URLSearchParams({
+          client_id: process.env.NEXT_PUBLIC_VK_CLIENT_ID,
+          display: 'popup',
+          redirect_uri: process.env.NEXT_PUBLIC_REDIRECT_URI,
+          scope: ['wall', 'photos', 'groups'],
+          response_type: 'token',
+          revoke: 1,
+          v: '5.126',
+          state: '123',
+        }),
+    );
+  });
+
+  const handlePostButtonClick = React.useCallback(
+    async function handlePostButtonClick() {
+      try {
+        const res = await fetch(
+          '/api/postToVk?' +
+            new URLSearchParams({
+              access_token: localStorage.getItem('ACCESS_TOKEN'),
+              photos: photos.map((photo) => photo.urls.regular),
+            }),
+          {
+            method: 'POST',
+          },
+        );
+        const data = await res.json();
+        console.log('bibbia', data);
+      } catch (e) {
+        console.log('PPPPPP', e);
+      }
+    },
+  );
+
+  const handlePhotoButtonClick = React.useCallback(async () => {
+    try {
+      const res = await fetch(
+        '/api/randomPictures?' + new URLSearchParams({ count: 6 }),
+      );
+      const data = await res.json();
+      setPhotos(data);
+      console.log(data);
+    } catch (e) {
+      console.log(e);
+    }
+  });
+
   return (
     <div className={styles.container}>
       <Head>
@@ -14,6 +68,10 @@ export default function Home() {
           Welcome to <a href="https://nextjs.org">Next.js!</a>
         </h1>
 
+        <button onClick={handleAutorizeButtonClick}>Autorize</button>
+        <button onClick={handlePostButtonClick}>Post it!</button>
+        <button onClick={handlePhotoButtonClick}>Get Random Photos</button>
+        {photos && <ImageGrid images={photos} />}
         <p className={styles.description}>
           Get started by editing{' '}
           <code className={styles.code}>pages/index.js</code>
@@ -61,5 +119,5 @@ export default function Home() {
         </a>
       </footer>
     </div>
-  )
+  );
 }
