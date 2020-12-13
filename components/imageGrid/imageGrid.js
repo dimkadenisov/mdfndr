@@ -1,4 +1,5 @@
-import Image from '../image';
+import React from 'react';
+import Image from '../Image';
 import styles from './imageGrid.module.css';
 
 export default function ImageGrid({ images }) {

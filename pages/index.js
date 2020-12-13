@@ -1,123 +1,64 @@
 import React from 'react';
 import Head from 'next/head';
-import ImageGrid from '../components/imageGrid';
 import styles from '../styles/Home.module.css';
 
-export default function Home() {
-  const [photos, setPhotos] = React.useState(null);
-
-  const handleAutorizeButtonClick = React.useCallback(() => {
-    window.location.assign(
-      'https://oauth.vk.com/authorize?' +
-        new URLSearchParams({
-          client_id: process.env.NEXT_PUBLIC_VK_CLIENT_ID,
-          display: 'popup',
-          redirect_uri: process.env.NEXT_PUBLIC_REDIRECT_URI,
-          scope: ['wall', 'photos', 'groups'],
-          response_type: 'token',
-          revoke: 1,
-          v: '5.126',
-          state: '123',
-        }),
-    );
+const tokenLink =
+  'https://oauth.vk.com/authorize?' +
+  new URLSearchParams({
+    client_id: process.env.NEXT_PUBLIC_VK_CLIENT_ID,
+    display: 'popup',
+    scope: ['wall', 'photos', 'groups', 'secure'],
+    response_type: 'token',
+    v: '5.126',
   });
 
-  const handlePostButtonClick = React.useCallback(
-    async function handlePostButtonClick() {
-      try {
-        const res = await fetch(
-          '/api/postToVk?' +
-            new URLSearchParams({
-              access_token: localStorage.getItem('ACCESS_TOKEN'),
-              photos: photos.map((photo) => photo.urls.regular),
-            }),
-          {
-            method: 'POST',
-          },
-        );
-        const data = await res.json();
-        console.log('bibbia', data);
-      } catch (e) {
-        console.log('PPPPPP', e);
-      }
-    },
-  );
+export default function Home() {
+  const handleFormSubmit = React.useCallback(async (e) => {
+    e.preventDefault();
 
-  const handlePhotoButtonClick = React.useCallback(async () => {
+    const token = e.target.token.value;
     try {
-      const res = await fetch(
-        '/api/randomPictures?' + new URLSearchParams({ count: 6 }),
+      const response = await fetch(`/api/checkToken?token=${token}`);
+
+      if (response.status === 200) {
+        //b96b08d2e6e492c2494289670dc15b86571d6cf1563118677ffe7c9ca2912fec4917725ea25c517db4998
+        const data = await response.json();
+
+        if (data.error) {
+          throw new Error();
+        }
+
+        if (data.response.success) {
+          localStorage.setItem('VK_ACCESS_TOKEN_EXPIRE', data.response.expire);
+          localStorage.setItem('VK_ACCESS_TOKEN', token);
+
+          window.location.replace('/home');
+        }
+      }
+    } catch {
+      alert(
+        'Не удалось проверить токен. Проверьте правильность ввода или повторите попытку позже.',
       );
-      const data = await res.json();
-      setPhotos(data);
-      console.log(data);
-    } catch (e) {
-      console.log(e);
     }
   });
 
   return (
     <div className={styles.container}>
       <Head>
-        <title>Create Next App</title>
+        <title>Moodfinder</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <button onClick={handleAutorizeButtonClick}>Autorize</button>
-        <button onClick={handlePostButtonClick}>Post it!</button>
-        <button onClick={handlePhotoButtonClick}>Get Random Photos</button>
-        {photos && <ImageGrid images={photos} />}
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
+        <span>Для использования приложения необходимо получить токен вк</span>
+        <a target="blank" href={tokenLink}>
+          Получить токен
         </a>
-      </footer>
+        <form onSubmit={handleFormSubmit}>
+          <input type="text" name="token" required />
+          <button>Проверить токен</button>
+        </form>
+      </main>
     </div>
   );
 }

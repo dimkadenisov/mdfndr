@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import styles from './image.module.css';
+import styles from './Image.module.css';
 
 export default function Image({ src }) {
   const [source, setSource] = React.useState(src);
