@@ -4,9 +4,8 @@ import updateVkAccessToken from './updateVkAccessToken';
 export default function tokenExpireDecorator(func) {
   return function () {
     if (!isVkAccessTokenValid()) {
-      updateVkAccessToken();
+      return updateVkAccessToken();
     }
-
     func(arguments);
   };
 }
