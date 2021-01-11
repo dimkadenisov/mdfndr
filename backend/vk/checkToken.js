@@ -7,7 +7,7 @@ export default async function checkToken(token) {
     token,
     access_token: appAccessToken,
     client_secret: process.env.VK_SECRET_KEY,
-    v: process.env.VK_API_VERSION,
+    v: process.env.NEXT_PUBLIC_VK_API_VERSION,
   });
 
   const response = await fetch(
@@ -16,6 +16,8 @@ export default async function checkToken(token) {
 
   if (response.status === 200) {
     const data = await response.json();
+
+    console.log(data);
 
     if (data.error) {
       throw new Error(data);

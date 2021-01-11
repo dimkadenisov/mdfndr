@@ -1,9 +1,9 @@
 import pick from 'lodash/pick';
-import api from '../../common/unsplashApi';
+import unsplashApi from '../../backend/unsplash/unsplashApi';
 
 export default async (req, res) => {
   try {
-    const { response } = await api.photos.getRandom(req.query);
+    const { response } = await unsplashApi.photos.getRandom(req.query);
     const data = Array.isArray(response)
       ? response.map((item) => pick(item, 'id', 'urls'))
       : {

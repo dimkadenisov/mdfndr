@@ -1,10 +1,10 @@
 import qs from 'querystring';
-import cachingDecorator from '../../common/cachingDecorator';
+import cachingDecorator from '../../frontend/common/cachingDecorator';
 
 const urlParams = qs.stringify({
   client_id: process.env.NEXT_PUBLIC_VK_CLIENT_ID,
   client_secret: process.env.VK_SECRET_KEY,
-  v: process.env.VK_API_VERSION,
+  v: process.env.NEXT_PUBLIC_VK_API_VERSION,
   grant_type: 'client_credentials',
 });
 

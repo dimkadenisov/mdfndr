@@ -1,24 +1,10 @@
 import React from 'react';
 import Head from 'next/head';
-import tokenExpireDecorator from '../common/tokenExpireDecorator';
-import ImageGrid from '../components/ImageGrid';
-import styles from '../styles/Home.module.css';
+import tokenExpireDecorator from '../frontend/common/tokenExpireDecorator';
+import ImageGrid from '../frontend/components/ImageGrid';
 
 export default function Home() {
   const [photos, setPhotos] = React.useState(null);
-
-  const handleAutorizeButtonClick = React.useCallback(() => {
-    window.location.assign(
-      'https://oauth.vk.com/authorize?' +
-        new URLSearchParams({
-          client_id: process.env.NEXT_PUBLIC_VK_CLIENT_ID,
-          display: 'popup',
-          scope: ['wall', 'photos', 'groups', 'secure'],
-          response_type: 'token',
-          v: '5.126',
-        }),
-    );
-  });
 
   const handlePostButtonClick = React.useCallback(
     tokenExpireDecorator(async function handlePostButtonClick() {
@@ -41,7 +27,7 @@ export default function Home() {
     }),
   );
 
-  const handlePhotoButtonClick = React.useCallback(async () => {
+  const handleGetRandomPhoto = React.useCallback(async () => {
     try {
       const res = await fetch(
         '/api/randomPictures?' + new URLSearchParams({ count: 6 }),
@@ -54,17 +40,36 @@ export default function Home() {
     }
   });
 
+  const handlePhotoFormSubmit = React.useCallback(async (e) => {
+    e.preventDefault();
+    const search = e.target.search.value;
+    try {
+      const res = await fetch(
+        '/api/searchPhotos?' +
+          new URLSearchParams({ query: search, perPage: 6 }),
+      );
+      const data = await res.json();
+      setPhotos(data);
+      console.log('biba', data);
+    } catch (e) {
+      console.log(e);
+    }
+  });
+
   return (
-    <div className={styles.container}>
+    <div>
       <Head>
         <title>Moodfinder</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className={styles.main}>
-        <button onClick={handleAutorizeButtonClick}>Autorize</button>
+      <main>
+        <form onSubmit={handlePhotoFormSubmit}>
+          <input type="text" name="search" placeholder="keywords" />
+          <button>Get Query Photos</button>
+        </form>
+        <button onClick={handleGetRandomPhoto}>Get Random Photos</button>
         <button onClick={handlePostButtonClick}>Post it!</button>
-        <button onClick={handlePhotoButtonClick}>Get Random Photos</button>
         {photos && <ImageGrid images={photos} />}
       </main>
     </div>
